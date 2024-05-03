@@ -1,6 +1,6 @@
 ﻿namespace UPB.BusinessLogic.Models
 {
-    public class Pacient
+    public class Patient
     {
         private int _ci;
         public int Ci
