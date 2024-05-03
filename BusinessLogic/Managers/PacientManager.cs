@@ -30,10 +30,43 @@ namespace UPB.BusinessLogic.Managers
 
         public Pacient GetPacientByCi(int ci)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Pacient foundPacient = _pacients.Find(p => p.Ci == ci);
+                return foundPacient;
+            }
+            catch
+            {
+                throw new Exception("Pacient not found");
+            }
         }
 
         public Pacient CreatePacient(Pacient pacient)
+        {
+            Pacient createdPacient = new Pacient()
+            {
+
+                Ci = pacient.Ci,
+                Name = pacient.Name,
+                LastName = pacient.LastName,
+                BloodType = this.RandomBloodType()
+            };
+
+            _pacients.Add(createdPacient);
+            return createdPacient;
+        }
+
+        public Pacient UpdatePacient(int ci, Pacient pacient)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Pacient DeletePacient(int ci)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string RandomBloodType()
         {
             Random random = new Random();
             int r = random.Next(1, 4);
@@ -54,28 +87,45 @@ namespace UPB.BusinessLogic.Managers
                     bloodType = "AB+";
                     break;
             }
+            return bloodType;
+        }
+        // Para el reader/writer
+        // _configuration.GetSection("FilePaths").GetSection("PatientFilePath").Value
 
-            Pacient createdPacient = new Pacient()
+        // Split string by ','
+        // string name = "Mauricio,Antezana,121212,O+"
+        // string[] values = name.Split(',');
+        public void Reader()
+        {
+            StreamReader reader = new StreamReader(_configuration.GetSection("FilePaths").GetSection("PatientFilePath").Value);
+
+            while (!reader.EndOfStream)
             {
+                string line = reader.ReadLine();
+                string[] values = line.Split(',');
 
-                Ci = pacient.Ci,
-                Name = pacient.Name,
-                LastName = pacient.LastName,
-                BloodType = bloodType
-            };
+                Pacient pacient = new Pacient
+                {
+                    Ci = int.Parse(values[0]),
+                    Name = values[1],
+                    LastName = values[2],
+                    BloodType = values[3]
+                };
 
-            _pacients.Add(createdPacient);
-            return createdPacient;
+                _pacients.Add(pacient);
+            }
         }
 
-        public Pacient UpdatePacient(int ci, Pacient pacient)
+        public void Writer()
         {
-            throw new NotImplementedException();
-        }
+            StreamWriter writer = new StreamWriter(_configuration.GetSection("FilePaths").GetSection("PatientFilePath").Value);
 
-        public Pacient DeletePacient(int ci)
-        {
-            throw new NotImplementedException();
+            foreach (Pacient pacient in _pacients)
+            {
+                writer.WriteLine($"{pacient.Ci},{pacient.Name},{pacient.LastName},{pacient.BloodType}");
+            }
+
+            writer.Close();
         }
     }
 }
