@@ -1,0 +1,4 @@
+7871719,Mauricio,Antezana,O+
+12873709,Fernanda,Burgos,AB+
+3596705,Hugo,Antezana,O+
+8943123,Carlos,Fernandez,O-

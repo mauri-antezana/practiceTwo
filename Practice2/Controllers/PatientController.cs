@@ -25,10 +25,10 @@ namespace UPB.Practice2.Controllers
 
         // GET api/<PatientController>/5
         [HttpGet]
-        [Route("{id}")]
+        [Route("{ci}")]
         public Patient Get(int ci)
         {
-            throw new NotImplementedException();
+            return _patientManager.GetPacientByCi(ci);
         }
 
 
@@ -41,18 +41,18 @@ namespace UPB.Practice2.Controllers
 
 
         // PUT api/<PatientController>/5
-        [HttpPut("{id}")]
+        [HttpPut("{ci}")]
         public void Put(int ci, [FromBody] Patient value)
         {
-            throw new NotImplementedException();
+            _patientManager.UpdatePatient(ci, value);
         }
 
 
         // DELETE api/<PatientController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{ci}")]
         public void Delete(int ci)
         {
-            throw new NotImplementedException();
+            _patientManager.DeletePatient(ci);
         }
     }
 }

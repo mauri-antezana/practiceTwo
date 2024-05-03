@@ -10,17 +10,19 @@ namespace UPB.BusinessLogic.Managers
 {
     public class PatientManager
     {
-        private List<Patient> _patients;
+        private List<Patient> _patients = new List<Patient>();
         private readonly IConfiguration _configuration;
 
         public PatientManager(IConfiguration configuration)
-        {
+        { 
             _configuration = configuration;
             Reader();
         }
 
         public List<Patient> GetAll()
         {
+            _patients.Clear();
+            Reader();
             return _patients;
         }
 
@@ -33,13 +35,12 @@ namespace UPB.BusinessLogic.Managers
             }
             catch
             {
-                throw new Exception("Pacient not found");
+                throw new Exception("Patient not found");
             }
         }
 
         public Patient CreatePatient(Patient patient)
         {
-
             Patient createdPatient = new Patient()
             {
                 Ci = patient.Ci,
@@ -48,19 +49,51 @@ namespace UPB.BusinessLogic.Managers
                 BloodType = RandomBloodType(),
             };
 
-            Writer(createdPatient);
             _patients.Add(createdPatient);
+            Writer(createdPatient);
             return createdPatient;
         }
 
-        public Patient UpdatePatient(int ci, Patient patient)
+        public Patient UpdatePatient(int ci, Patient patientToUpdate)
         {
-            throw new NotImplementedException();
+            Patient updatedPatient = new Patient()
+            {
+                Ci = ci,
+                Name = patientToUpdate.Name,
+                LastName = patientToUpdate.LastName,
+                BloodType = patientToUpdate.BloodType
+            };
+
+            for(int i=0; i <_patients.Count; i++)
+            {
+                if (_patients[i].Ci == ci)
+                {
+                    _patients[i] = updatedPatient;
+                    Rewrite();
+                    break;
+                }
+                else
+                {
+                    throw new Exception("Patient not found");
+                }
+            }
+            return updatedPatient;
         }
 
-        public Patient DeletePatient(int ci)
+        public void DeletePatient(int ci)
         {
-            throw new NotImplementedException();
+            for (int i=0; i < _patients.Count; i++)
+            {
+                if (_patients[i].Ci == ci)
+                {
+                    _patients.RemoveAt(i);
+                    Rewrite();
+                    break;
+
+                }
+                else
+                    throw new Exception("Patient not found");
+            }
         }
 
         public string RandomBloodType()
@@ -106,14 +139,27 @@ namespace UPB.BusinessLogic.Managers
 
                 _patients.Add(patient);
             }
+            reader.Close();
         }
 
         public void Writer(Patient patient)
         {
-            StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value);
+            StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value,true);
 
             writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
             
+            writer.Close();
+        }
+
+        public void Rewrite()
+        {
+            StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value);
+
+            foreach (var patient in _patients)
+            {
+                writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
+            }
+
             writer.Close();
         }
     }
