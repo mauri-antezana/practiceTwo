@@ -8,7 +8,7 @@ using UPB.BusinessLogic.Models;
 
 namespace UPB.BusinessLogic.Managers
 {
-    internal class PacientManager
+    public class PacientManager
     {
         private List<Pacient> _pacients;
         private readonly IConfiguration _configuration;
@@ -28,7 +28,7 @@ namespace UPB.BusinessLogic.Managers
             return _pacients;
         }
 
-        public async Task<Pacient> Get(int ci)
+        public Pacient GetPacientByCi(int ci)
         {
             throw new NotImplementedException();
         }
