@@ -67,7 +67,6 @@ namespace UPB.BusinessLogic.Managers
             {
                 Name = patientToUpdate.Name,
                 LastName = patientToUpdate.LastName,
-                BloodType = patientToUpdate.BloodType
             };
 
             try
