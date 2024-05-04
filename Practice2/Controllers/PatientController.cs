@@ -28,7 +28,7 @@ namespace UPB.Practice2.Controllers
         [Route("{ci}")]
         public Patient Get(int ci)
         {
-            return _patientManager.GetPacientByCi(ci);
+            return _patientManager.GetPatientByCi(ci);
         }
 
 

@@ -2,4 +2,4 @@
 3596705,Hugo,Antezana,O+
 8943123,Carlos,Fernandez,O
 736231,Pedro,Suarez,O+
-7871719,Mauricio,Antezana,AB+
+0,Rodrigo,Antezana,AB+

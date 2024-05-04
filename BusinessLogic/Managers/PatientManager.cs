@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UPB.BusinessLogic.Exceptions;
 using UPB.BusinessLogic.Models;
 
 namespace UPB.BusinessLogic.Managers
@@ -17,6 +18,7 @@ namespace UPB.BusinessLogic.Managers
         public PatientManager(IConfiguration configuration)
         { 
             _configuration = configuration;
+            _patients.Clear();
             Reader();
         }
 
@@ -27,16 +29,20 @@ namespace UPB.BusinessLogic.Managers
             return _patients;
         }
 
-        public Patient GetPacientByCi(int ci)
+        public Patient GetPatientByCi(int ci)
         {
             try
             {
                 Patient foundPatient = _patients.Find(p => p.Ci == ci);
                 return foundPatient;
             }
-            catch
+            catch (Exception ex) 
             {
-                throw new Exception("Patient not found");
+                PatientNotFoundException pnfEx = new PatientNotFoundException("GetPatientByCi");
+                Log.Error(pnfEx.GetMessage());
+                Log.Error("GetPatientByCi StackTrace: " + pnfEx.StackTrace);
+
+                throw new Exception("Patient not found", ex);
             }
         }
 
@@ -59,42 +65,41 @@ namespace UPB.BusinessLogic.Managers
         {
             Patient updatedPatient = new Patient()
             {
-                Ci = ci,
                 Name = patientToUpdate.Name,
                 LastName = patientToUpdate.LastName,
                 BloodType = patientToUpdate.BloodType
             };
 
-            for(int i=0; i <_patients.Count; i++)
+            try
             {
-                if (_patients[i].Ci == ci)
-                {
-                    _patients[i] = updatedPatient;
-                    Rewrite();
-                    break;
-                }
-                else
-                {
-                    throw new Exception("Patient not found");
-                }
+                int index = _patients.FindIndex(p => p.Ci == ci);
+                _patients[index] = updatedPatient;
+                Rewrite();
+                return updatedPatient;
             }
-            return updatedPatient;
+            catch (Exception ex)
+            {
+                PatientNotFoundException pnfEx = new PatientNotFoundException("UpdatePatient");
+                Log.Error(pnfEx.GetMessage());
+
+                throw new Exception("Patient not found", ex);
+            }   
         }
 
         public void DeletePatient(int ci)
         {
-            for (int i=0; i < _patients.Count; i++)
+            try
             {
-                if (_patients[i].Ci == ci)
-                {
-                    _patients.RemoveAt(i);
-                    Rewrite();
-                    break;
+                int index = _patients.FindIndex(p => p.Ci == ci);
+                _patients.RemoveAt(index);
+                Rewrite();
+            }
+            catch (Exception ex)
+            {
+                PatientNotFoundException pnfEx = new PatientNotFoundException("DeletePatient");
+                Log.Error(pnfEx.GetMessage());
 
-                }
-                else
-                    Log.Error("Error");
-                    throw new Exception("Patient not found");
+                throw new Exception("Patient not found", ex);
             }
         }
 
@@ -148,7 +153,7 @@ namespace UPB.BusinessLogic.Managers
         {
             StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value,true);
 
-            writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}\n");
+            writer.WriteLine($"\n{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
             
             writer.Close();
         }
