@@ -1,9 +1,16 @@
+using Serilog;
 using UPB.BusinessLogic.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File(builder.Configuration.GetSection("Logging").GetSection("FilePaths").GetSection("LogPath").Value)
+    .CreateLogger();
 
+Log.Information("Initialazing the server");
+
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSingleton<PatientManager>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

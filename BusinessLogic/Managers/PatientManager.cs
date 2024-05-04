@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,6 +93,7 @@ namespace UPB.BusinessLogic.Managers
 
                 }
                 else
+                    Log.Error("Error");
                     throw new Exception("Patient not found");
             }
         }
@@ -146,7 +148,7 @@ namespace UPB.BusinessLogic.Managers
         {
             StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value,true);
 
-            writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
+            writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}\n");
             
             writer.Close();
         }
