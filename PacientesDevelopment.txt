@@ -1,5 +1,4 @@
-12873709,Fernanda,Burgos,AB+
-3596705,Hugo,Antezana,O+
-8943123,Carlos,Fernandez,O
-736231,Pedro,Suarez,O+
-0,Rodrigo,Antezana,AB+
+7871719,Mauricio,Antezana,O+
+123456,Julio,Sanchez,AB-
+654321,Pedro,Daza,O-
+987678,Fernanda,Burgos,A-

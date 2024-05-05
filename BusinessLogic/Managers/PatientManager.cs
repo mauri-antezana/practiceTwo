@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UPB.BusinessLogic.Exceptions;
+using UPB.BusinessLogic.Managers.Exceptions;
 using UPB.BusinessLogic.Models;
 
 namespace UPB.BusinessLogic.Managers
@@ -29,21 +29,21 @@ namespace UPB.BusinessLogic.Managers
             return _patients;
         }
 
-        public Patient GetPatientByCi(int ci)
+        public async Task<Patient> GetPatientByCi(int ci)
         {
-            try
+            Patient foundPatient = _patients.Find(p => p.Ci == ci);
+
+            if (foundPatient == null)
             {
-                Patient foundPatient = _patients.Find(p => p.Ci == ci);
-                return foundPatient;
-            }
-            catch (Exception ex) 
-            {
-                PatientNotFoundException pnfEx = new PatientNotFoundException("GetPatientByCi");
-                Log.Error(pnfEx.GetMessage());
+                PatientNotFoundException pnfEx = new PatientNotFoundException("Patient not found");
+                Log.Error(pnfEx.GetMessageForLogs("GetPatientByCi"));
                 Log.Error("GetPatientByCi StackTrace: " + pnfEx.StackTrace);
 
-                throw new Exception("Patient not found", ex);
+                throw pnfEx;
             }
+
+            return foundPatient;
+
         }
 
         public Patient CreatePatient(Patient patient)
@@ -57,31 +57,33 @@ namespace UPB.BusinessLogic.Managers
             };
 
             _patients.Add(createdPatient);
-            Writer(createdPatient);
+            Rewrite();
             return createdPatient;
         }
 
         public Patient UpdatePatient(int ci, Patient patientToUpdate)
         {
-            Patient updatedPatient = new Patient()
-            {
-                Name = patientToUpdate.Name,
-                LastName = patientToUpdate.LastName,
-            };
-
             try
             {
+                Patient updatedPatient = new Patient()
+                {
+                    Name = patientToUpdate.Name,
+                    LastName = patientToUpdate.LastName,
+                };
+
                 int index = _patients.FindIndex(p => p.Ci == ci);
-                _patients[index] = updatedPatient;
+                _patients[index].Name = updatedPatient.Name;
+                _patients[index].LastName = updatedPatient.LastName;
                 Rewrite();
                 return updatedPatient;
             }
             catch (Exception ex)
             {
-                PatientNotFoundException pnfEx = new PatientNotFoundException("UpdatePatient");
-                Log.Error(pnfEx.GetMessage());
+                PatientNotFoundException pnfEx = new PatientNotFoundException(ex.Message);
+                Log.Error(pnfEx.GetMessageForLogs("UpdatePatient"));
+                Log.Error("UpdatePatient StackTrace: " + pnfEx.StackTrace);
 
-                throw new Exception("Patient not found", ex);
+                throw pnfEx;
             }   
         }
 
@@ -95,10 +97,11 @@ namespace UPB.BusinessLogic.Managers
             }
             catch (Exception ex)
             {
-                PatientNotFoundException pnfEx = new PatientNotFoundException("DeletePatient");
-                Log.Error(pnfEx.GetMessage());
+                PatientNotFoundException pnfEx = new PatientNotFoundException(ex.Message);
+                Log.Error(pnfEx.GetMessageForLogs("DeletePatient"));
+                Log.Error("DeletePatient StackTrace: " + pnfEx.StackTrace);
 
-                throw new Exception("Patient not found", ex);
+                throw pnfEx;
             }
         }
 
@@ -147,16 +150,6 @@ namespace UPB.BusinessLogic.Managers
             }
             reader.Close();
         }
-
-        public void Writer(Patient patient)
-        {
-            StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value,true);
-
-            writer.WriteLine($"\n{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
-            
-            writer.Close();
-        }
-
         public void Rewrite()
         {
             StreamWriter writer = new StreamWriter(_configuration.GetSection("Logging").GetSection("FilePaths").GetSection("PatientPath").Value);
