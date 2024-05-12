@@ -1,4 +1,6 @@
-7871719,Mauricio,Antezana,O+
-123456,Julio,Sanchez,AB-
-654321,Pedro,Daza,O-
-987678,Fernanda,Burgos,A-
+7871719,Mauricio,Antezana,O+,MA-7871719
+123456,Julio,Sanchez,AB-,JS-123456
+654321,Pedro,Daza,O-,PD-654321
+987678,Fernanda,Burgos,A-,FB-987678
+98765,Monica,Galindo,A+,MG-98765
+87654,Juan,Soliz,B+,JS-87654

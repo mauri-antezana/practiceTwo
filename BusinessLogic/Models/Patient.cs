@@ -11,5 +11,6 @@
         public string Name { get; set; }
         public string LastName { get; set; }
         public string BloodType { get; set; }
+        public string Code { get; set; }
     }
 }

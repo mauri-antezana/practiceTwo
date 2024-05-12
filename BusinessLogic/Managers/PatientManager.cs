@@ -3,6 +3,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using UPB.BusinessLogic.Managers.Exceptions;
@@ -14,6 +15,7 @@ namespace UPB.BusinessLogic.Managers
     {
         private List<Patient> _patients = new List<Patient>();
         private readonly IConfiguration _configuration;
+        private HttpClient _httpClient = new HttpClient();
 
         public PatientManager(IConfiguration configuration)
         { 
@@ -54,6 +56,7 @@ namespace UPB.BusinessLogic.Managers
                 Name = patient.Name,
                 LastName = patient.LastName,
                 BloodType = RandomBloodType(),
+                Code = CreateCode(patient).Result
             };
 
             _patients.Add(createdPatient);
@@ -74,6 +77,7 @@ namespace UPB.BusinessLogic.Managers
                 int index = _patients.FindIndex(p => p.Ci == ci);
                 _patients[index].Name = updatedPatient.Name;
                 _patients[index].LastName = updatedPatient.LastName;
+                _patients[index].Code = CreateCode(_patients[index]).Result;
                 Rewrite();
                 return updatedPatient;
             }
@@ -103,6 +107,20 @@ namespace UPB.BusinessLogic.Managers
 
                 throw pnfEx;
             }
+        }
+
+        private async Task<string> CreateCode(Patient patient)
+        {
+            var info = new 
+            {
+                Ci = patient.Ci,
+                Name = patient.Name,
+                LastName = patient.LastName
+            };
+
+            var result = await _httpClient.PostAsJsonAsync(_configuration.GetSection("Logging").GetSection("Strings").GetSection("GetCodeURL").Value, info);
+
+            return await result.Content.ReadAsStringAsync();
         }
 
         public string RandomBloodType()
@@ -143,7 +161,8 @@ namespace UPB.BusinessLogic.Managers
                     Ci = int.Parse(values[0]),
                     Name = values[1],
                     LastName = values[2],
-                    BloodType = values[3]
+                    BloodType = values[3],
+                    Code = values[4]
                 };
 
                 _patients.Add(patient);
@@ -156,7 +175,7 @@ namespace UPB.BusinessLogic.Managers
 
             foreach (var patient in _patients)
             {
-                writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType}");
+                writer.WriteLine($"{patient.Ci},{patient.Name},{patient.LastName},{patient.BloodType},{patient.Code}");
             }
 
             writer.Close();
